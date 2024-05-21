@@ -1,0 +1,61 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+const char* ssid = "xxxxxx";  // your network SSID (name of wifi network)
+const char* password = "xxxxxx";  // your network password
+
+HTTPClient http;
+
+void setup() {
+  delay(1000);
+  Serial.begin(115200);
+ 
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+ 
+  Serial.println("");
+  Serial.println("WiFi connected");  
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  String toEncode = "test";
+  //String encoded = base64::encode(toEncode);
+  //Serial.println(encoded);
+
+}
+
+int loop_cnt =0;
+void loop() {
+  loop_cnt++;
+  Serial.println("###");
+  Serial.println(loop_cnt);
+  Serial.println(WiFi.localIP());
+
+  if(WiFi.status() == WL_CONNECTED) {
+    
+    http.begin("https://api.aiforthai.in.th/xiaofan-zh-th"); //Api url, this example is a Thai to Chinese Machine Translation.
+    http.addHeader("Apikey", "xxxxxxxxxxxxx"); //Your Apikey
+    http.addHeader("Content-Type", "application/json");
+    http.addHeader("Accept", "*/*");
+    String postbody = "{\"input\" : \"ฉันจะซื้อคอมพิวเตอร์เครื่องใหม่ให้คุณ\" , \"src\" : \"th\", \"trg\" : \"zh\"}";
+    int httpCode = http.POST(postbody);
+    if (httpCode == 200) {
+      String content = http.getString();
+      Serial.println("Content ---------");
+      Serial.println(content);
+      Serial.println("-----------------");
+    } else {
+      Serial.println("Fail. error code " + String(httpCode));
+    }
+    Serial.println("httpCode");
+    Serial.println(httpCode);
+    //
+    http.end();
+  }
+  delay(5000);
+  Serial.println("###");  
+}
